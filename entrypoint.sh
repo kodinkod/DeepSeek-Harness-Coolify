@@ -7,6 +7,8 @@ set -e
 # dsh rejects wildcard binds (0.0.0.0), so bind the container's own address.
 # Override with DSH_HOST if the container sits on several networks.
 HOST="${DSH_HOST:-$(hostname -i | awk '{print $1}')}"
+echo "$HOST" > /tmp/dsh-host
+echo "entrypoint: binding dsh to $HOST:3080 (all addresses: $(hostname -i))"
 
 exec dsh --profile web --no-open \
   --host "$HOST" \
