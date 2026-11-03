@@ -1,0 +1,18 @@
+services:
+  dsh:
+    build:
+      context: .
+      args:
+        DSH_VERSION: ${DSH_VERSION:-0.2.1-rc.5}
+    restart: unless-stopped
+    environment:
+      - PUBLIC_URL=${PUBLIC_URL}       # https://dsh.example.com/
+      - TRUSTED_HOST=${TRUSTED_HOST}   # dsh.example.com
+      - DSH_HOST=${DSH_HOST:-}         # optional: bind address override
+    volumes:
+      - dsh-home:/data/dsh
+      - dsh-workspace:/workspace
+
+volumes:
+  dsh-home:
+  dsh-workspace:
