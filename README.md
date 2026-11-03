@@ -30,19 +30,21 @@
 - Traefik сохраняет заголовок `Host`, а `/api` пускает только авторитеты из `--trusted-host`. С чужим `Host` в ответ приходит `403`.
 - `--public-url` влияет только на напечатанную ссылку и runtime-контекст, доверия он не даёт.
 
-## Basic auth поверх токена (рекомендую)
+## Basic auth поверх токена (включён)
 
-Это агент с shell, держать его в интернете только за токеном не стоит. В Coolify добавь в `docker-compose.yml` у сервиса `dsh`:
+Это агент с shell, держать его в интернете только за токеном не стоит. Labels для basic auth уже лежат в `docker-compose.yml`, остаётся задать две переменные в Coolify:
 
-```yaml
-    labels:
-      - "traefik.http.middlewares.dsh-auth.basicauth.users=${DSH_BASIC_AUTH}"
-      - "traefik.http.routers.<router-name>.middlewares=dsh-auth"
-```
+1. Сгенерировать строку. На Маке:
+   ```bash
+   htpasswd -nB admin
+   ```
+   Команда спросит пароль и выдаст строку вида `admin:$2y$05$...`.
+2. В Coolify, в **Environment Variables**:
+   - `DSH_BASIC_AUTH` = эта строка **как есть**, с одинарными `$`. Удваивать не нужно, это требуется только для значений прямо в compose-файле. Если у переменной есть галочка **Is Literal?**, включи её.
+   - `DSH_TRAEFIK_ROUTER` нужен, только если имя роутера отличается от `https-0-m3q6crdtosbqlmit5uadhii5-dsh`. Точное имя видно в **Show Deployable Compose**, в label `traefik.http.routers.<имя>.rule`.
+3. Редеплой. На `https://dsh.твойдомен.com` браузер должен спросить логин и пароль.
 
-- `<router-name>` — имя https-роутера, которое Coolify сгенерировал для сервиса. Его видно в сгенерированных labels на странице ресурса.
-- `DSH_BASIC_AUTH` — строка вида `user:$$2y$$...` (знаки `$` удваиваются). Сгенерировать её можно так:
-  `htpasswd -nbB user 'пароль' | sed -e 's/\$/\$\$/g'`
+Если `DSH_BASIC_AUTH` пустой, Traefik не поднимет middleware, и сайт отдаст ошибку, а не откроется без пароля.
 
 Вместо basic auth можно поставить forward auth (Authelia, Authentik и т.п.), если он у тебя уже есть.
 
