@@ -13,11 +13,12 @@ services:
       - dsh-home:/data/dsh
       - dsh-workspace:/workspace
     labels:
-      # Basic auth in front of dsh. DSH_BASIC_AUTH is the raw `htpasswd -nB` line
-      # (single `$`, no doubling). Coolify attaches middlewares defined here to the
-      # routers it generates, so no router name is needed (and Coolify does not
-      # interpolate variables in label keys anyway).
-      - "traefik.http.middlewares.dsh-auth.basicauth.users=${DSH_BASIC_AUTH}"
+      # Basic auth in front of dsh. Coolify does not interpolate env vars in
+      # labels, so the password hash lives in a Traefik dynamic config on the
+      # server (Servers -> Proxy -> Dynamic Configurations, middleware
+      # "dsh-basic"). Coolify attaches middlewares defined here to its routers.
+      # If that file is missing, the router fails closed with 404.
+      - "traefik.http.middlewares.dsh-auth.chain.middlewares=dsh-basic@file"
 
 volumes:
   dsh-home:
