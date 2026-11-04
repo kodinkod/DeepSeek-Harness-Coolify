@@ -20,7 +20,7 @@ EXPOSE 3080
 # Any HTTP answer (401 without a token is normal) means the server is up.
 # Probe the exact address entrypoint.sh bound to; Traefik skips containers
 # that are not healthy, so a wrong probe shows up as "no available server".
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --start-interval=3s --retries=3 \
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=3 \
   CMD node -e "const h=require('fs').readFileSync('/tmp/dsh-host','utf8').trim();fetch('http://'+(h.includes(':')?'['+h+']':h)+':3080/').then(r=>process.exit(r.status<500?0:1),()=>process.exit(1))"
 
 ENTRYPOINT ["/entrypoint.sh"]

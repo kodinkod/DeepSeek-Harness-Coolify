@@ -14,12 +14,10 @@ services:
       - dsh-workspace:/workspace
     labels:
       # Basic auth in front of dsh. DSH_BASIC_AUTH is the raw `htpasswd -nB` line
-      # (single `$`, no doubling). If it is empty, Traefik rejects the middleware
-      # and the router stays closed: fail closed, not open.
+      # (single `$`, no doubling). Coolify attaches middlewares defined here to the
+      # routers it generates, so no router name is needed (and Coolify does not
+      # interpolate variables in label keys anyway).
       - "traefik.http.middlewares.dsh-auth.basicauth.users=${DSH_BASIC_AUTH}"
-      # Router name Coolify generates: https-<domain index>-<resource uuid>-<service>.
-      # Check it in "Show Deployable Compose" and set DSH_TRAEFIK_ROUTER if it differs.
-      - "traefik.http.routers.${DSH_TRAEFIK_ROUTER:-https-0-m3q6crdtosbqlmit5uadhii5-dsh}.middlewares=dsh-auth"
 
 volumes:
   dsh-home:
