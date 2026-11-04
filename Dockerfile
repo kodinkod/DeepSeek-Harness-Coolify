@@ -7,9 +7,14 @@ RUN apt-get update \
 # Pin the version: `npm view @deepseek-ai/dsh version`.
 # Use 0.2.1-rc.2 or newer (older builds hid model settings behind a proxy, see upstream #9541).
 ARG DSH_VERSION=0.2.1-rc.5
-RUN npm i -g "@deepseek-ai/dsh@${DSH_VERSION}" && npm cache clean --force
+# pnpm is what dsh's plugin manager runs (Plugins -> Discover/Install, `dsh plugin add`).
+ARG PNPM_VERSION=10.34.9
+RUN npm i -g "@deepseek-ai/dsh@${DSH_VERSION}" "pnpm@${PNPM_VERSION}" && npm cache clean --force
 
 ENV DSH_HOME=/data/dsh
+# Keep pnpm's store on the same volume as the profiles: survives redeploys and
+# lets pnpm hard-link into profile node_modules instead of copying.
+ENV npm_config_store_dir=/data/dsh/.pnpm-store
 WORKDIR /workspace
 
 COPY entrypoint.sh /entrypoint.sh
