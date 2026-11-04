@@ -5,6 +5,10 @@ services:
       args:
         DSH_VERSION: ${DSH_VERSION:-0.2.1-rc.5}
     restart: unless-stopped
+    # Cap the agent so a heavy build or test run inside /workspace gets dsh
+    # OOM-killed instead of starving the other apps on the server.
+    mem_limit: 2g
+    cpus: 1.5
     environment:
       - PUBLIC_URL=${PUBLIC_URL}       # https://dsh.example.com/
       - TRUSTED_HOST=${TRUSTED_HOST}   # dsh.example.com
